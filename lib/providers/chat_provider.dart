@@ -1,47 +1,9 @@
-// import 'package:flutter/material.dart';
-// import '../data/sqlite_data_source.dart';
-// import '../data/local_data_source.dart';
-
-// class ChatProvider with ChangeNotifier {
-//   List<ChatMessage> _messages = [];
-//   final SqliteDataSource _db = SqliteDataSource();
-
-//   List<ChatMessage> get messages => _messages;
-
-//   Future<void> loadMessages() async {
-//     _messages = await _db.getAllMessages();
-//     notifyListeners();
-//   }
-
-//   Future<void> sendMessage(ChatMessage msg) async {
-//     await _db.upsertMessage(msg);
-//     await loadMessages();
-//   }
-
-//   Future<void> deleteMessage(String id) async {
-//     await _db.deleteMessageById(id);
-//     await loadMessages();
-//   }
-
-//   void addReaction(String msgId, String reaction, String userId) {
-//     _db.addReaction(msgId, reaction, userId);
-//     loadMessages();
-//   }
-
-//   void removeReaction(String msgId, String reaction, String userId) {
-//     _db.removeReaction(msgId, reaction, userId);
-//     loadMessages();
-//   }
-
-//   // يمكنك إضافة دوال إضافية حسب الحاجة
-// }
-
+import 'package:english_mentor_ai2/data/sqlite_chat_data_source.dart';
+import 'package:english_mentor_ai2/models/chat_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/sqlite_data_source.dart';
-import '../data/local_data_source.dart';
 
 final chatProvider = StateNotifierProvider<ChatNotifier, ChatState>(
-  (ref) => ChatNotifier(SqliteDataSource()),
+  (ref) => ChatNotifier(SqliteChatDataSource()),
 );
 
 class ChatState {
@@ -69,7 +31,7 @@ class ChatState {
 }
 
 class ChatNotifier extends StateNotifier<ChatState> {
-  final SqliteDataSource _db;
+  final SqliteChatDataSource _db;
   static const int _pageSize = 30;
 
   ChatNotifier(this._db) : super(ChatState(messages: [])) {
