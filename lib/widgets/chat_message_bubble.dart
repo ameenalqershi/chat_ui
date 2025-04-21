@@ -63,12 +63,12 @@ class ChatMessageBubble extends StatelessWidget {
   Widget _buildByType(BuildContext context) {
     switch (msg.type) {
       case MessageType.text:
-        return _buildTelegramTextBubble(context);
+        return _buildTextBubble(context);
       case MessageType.image:
         if (msg.mediaUrl != null && msg.mediaUrl!.isNotEmpty) {
           return _buildTelegramImageBubble(context);
         }
-        return _buildTelegramTextBubble(context); // fallback if no URL
+        return _buildTextBubble(context); // fallback if no URL
       case MessageType.voice:
         return _buildVoiceBubble(context);
       case MessageType.video:
@@ -76,53 +76,99 @@ class ChatMessageBubble extends StatelessWidget {
       case MessageType.file:
         return _buildFileBubble(context);
       default:
-        return _buildTelegramTextBubble(context);
+        return _buildTextBubble(context);
     }
   }
 
   /// =========== TEXT BUBBLE (TELEGRAM STYLE) ===========
-  Widget _buildTelegramTextBubble(BuildContext context) {
+  Widget _buildTextBubble(BuildContext context) {
     final isMe = msg.isMe;
-    final bubbleColor = isMe ? const Color(0xffe0f6fd) : Colors.white;
+    final bubbleColor = isMe ? const Color(0xff63aee1) : Colors.white;
+    final textColor = isMe ? Colors.white : const Color(0xff222a35);
 
-    BorderRadius bubbleRadius = BorderRadius.only(
-      topLeft: isMe ? const Radius.circular(12) : const Radius.circular(18),
-      topRight: isMe ? const Radius.circular(18) : const Radius.circular(12),
-      bottomLeft: const Radius.circular(18),
-      bottomRight: const Radius.circular(18),
+    // BorderRadius مطابقة لتليجرام
+    final borderRadius = BorderRadius.only(
+      topLeft: const Radius.circular(19),
+      topRight: const Radius.circular(19),
+      bottomLeft: isMe ? const Radius.circular(19) : const Radius.circular(3),
+      bottomRight: isMe ? const Radius.circular(3) : const Radius.circular(19),
     );
 
-    return Container(
-      decoration: BoxDecoration(
-        color: bubbleColor,
-        borderRadius: bubbleRadius,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.07),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-      child: Column(
-        crossAxisAlignment:
-            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (repliedMsg != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: _buildReplySnippet(context),
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.82,
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: bubbleColor,
+          borderRadius: borderRadius,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
             ),
-          Text(
-            msg.text,
-            style: const TextStyle(fontSize: 16, height: 1.4),
-            textAlign: TextAlign.start,
-          ),
-          const SizedBox(height: 6),
-          _buildBubbleMeta(),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (repliedMsg != null && repliedMsg!.text.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color:
+                      isMe
+                          ? Colors.white.withOpacity(0.16)
+                          : const Color(0xffe5ebee),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  repliedMsg!.text,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color:
+                        isMe ? Colors.white.withOpacity(0.82) : Colors.black87,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            // نص الرسالة
+            Text(
+              msg.text,
+              style: TextStyle(color: textColor, fontSize: 16, height: 1.38),
+            ),
+            const SizedBox(height: 2),
+            // الوقت + علامة ✓✓ للمرسل
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment:
+                  isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: [
+                Text(
+                  _formatSentAt(msg.createdAt),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isMe ? Colors.white70 : Colors.grey[600],
+                  ),
+                ),
+                if (isMe) ...[
+                  const SizedBox(width: 3),
+                  Icon(
+                    Icons.done_all,
+                    size: 17,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
