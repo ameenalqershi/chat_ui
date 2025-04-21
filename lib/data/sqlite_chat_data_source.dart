@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'package:chat_ui/data/chat_data_source.dart';
+import 'package:chat_ui/models/chat_message.dart';
+import 'package:chat_ui/models/message_type.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-class SqliteChatDataSource {
+class SqliteChatDataSource implements ChatDataSource {
   static final SqliteChatDataSource _instance =
       SqliteChatDataSource._internal();
   factory SqliteChatDataSource() => _instance;
@@ -222,58 +225,10 @@ class SqliteChatDataSource {
     }
   }
 
-  // Insert or update a message
-  Future<void> upsertMessage(ChatMessage msg) async {
-    final db = await database;
-    await db.insert(
-      'messages',
-      _msgToMap(msg),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  // Insert or update multiple messages
-  Future<void> upsertMessages(List<ChatMessage> messages) async {
-    final db = await database;
-    final batch = db.batch();
-    for (final msg in messages) {
-      batch.insert(
-        'messages',
-        _msgToMap(msg),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    await batch.commit(noResult: true);
-  }
-
-  // Get all messages (optionally by replyToMessageId, or custom order/filters)
-  Future<List<ChatMessage>> getAllMessages({String? replyToMessageId}) async {
-    final db = await database;
-    String whereStr = '';
-    List<dynamic> whereArgs = [];
-    if (replyToMessageId != null) {
-      whereStr = 'replyToMessageId = ?';
-      whereArgs = [replyToMessageId];
-    }
-    final maps = await db.query(
-      'messages',
-      where: whereStr.isNotEmpty ? whereStr : null,
-      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
-      orderBy: 'createdAt ASC',
-      limit: 1,
-    );
-    List<ChatMessage> msgs = [];
-    for (final map in maps) {
-      final msg = _msgFromMap(map);
-      final reactions = await getReactions(msg.id);
-      msgs.add(msg.copyWith(reactions: reactions));
-    }
-    return msgs;
-  }
-
   // Paging: تحميل رسائل محدودة مع دعم beforeId
-  Future<List<ChatMessage>> getMessages({
-    required int limit,
+  @override
+  Future<List<ChatMessage>> fetchMessages({
+    int limit = 20,
     String? beforeId,
   }) async {
     final db = await database;
@@ -332,39 +287,51 @@ class SqliteChatDataSource {
     return result;
   }
 
-  // Get message by id
-  Future<ChatMessage?> getMessageById(String id) async {
+  // Insert or update a message
+  @override
+  Future<void> sendMessage(ChatMessage msg) async {
     final db = await database;
-    final maps = await db.query(
+    await db.insert(
       'messages',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
+      _msgToMap(msg),
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    if (maps.isEmpty) return null;
-    return _msgFromMap(maps.first);
   }
 
   // Delete message by id
-  Future<void> deleteMessageById(String id) async {
+  @override
+  Future<void> deleteMessage(String messageId) async {
     final db = await database;
-    await db.delete('messages', where: 'id = ?', whereArgs: [id]);
+    await db.delete('messages', where: 'id = ?', whereArgs: [messageId]);
   }
 
-  // Delete all messages
-  Future<void> deleteAllMessages() async {
+  // إضافة رد فعل
+  @override
+  Future<void> addReaction(
+    String messageId,
+    String reaction,
+    String userId,
+  ) async {
     final db = await database;
-    await db.delete('messages');
+    await db.insert('reactions', {
+      'messageId': messageId,
+      'reaction': reaction,
+      'userId': userId,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
-  // Update a message
-  Future<void> updateMessage(ChatMessage msg) async {
+  // إزالة رد فعل
+  @override
+  Future<void> removeReaction(
+    String messageId,
+    String reaction,
+    String userId,
+  ) async {
     final db = await database;
-    await db.update(
-      'messages',
-      _msgToMap(msg),
-      where: 'id = ?',
-      whereArgs: [msg.id],
+    await db.delete(
+      'reactions',
+      where: 'messageId = ? AND reaction = ? AND userId = ?',
+      whereArgs: [messageId, reaction, userId],
     );
   }
 
@@ -401,34 +368,6 @@ class SqliteChatDataSource {
     replyToMessageId: map['replyToMessageId'],
     sender: map['senderName'],
   );
-
-  // إضافة رد فعل
-  Future<void> addReaction(
-    String messageId,
-    String reaction,
-    String userId,
-  ) async {
-    final db = await database;
-    await db.insert('reactions', {
-      'messageId': messageId,
-      'reaction': reaction,
-      'userId': userId,
-    }, conflictAlgorithm: ConflictAlgorithm.ignore);
-  }
-
-  // إزالة رد فعل
-  Future<void> removeReaction(
-    String messageId,
-    String reaction,
-    String userId,
-  ) async {
-    final db = await database;
-    await db.delete(
-      'reactions',
-      where: 'messageId = ? AND reaction = ? AND userId = ?',
-      whereArgs: [messageId, reaction, userId],
-    );
-  }
 
   MessageType _parseType(String? str) {
     switch (str) {

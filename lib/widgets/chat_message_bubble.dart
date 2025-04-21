@@ -1,5 +1,5 @@
-import 'package:english_mentor_ai2/models/chat_message.dart';
-import 'package:english_mentor_ai2/models/message_type.dart';
+import 'package:chat_ui/models/chat_message.dart';
+import 'package:chat_ui/models/message_type.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'telegram_image_viewer.dart';

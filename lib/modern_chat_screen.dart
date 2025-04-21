@@ -1,5 +1,5 @@
 // import 'package:flutter/material.dart';
-// import 'package:english_mentor_ai2/data/local_data_source.dart';
+// import 'package:chat_ui/data/local_data_source.dart';
 // import 'package:google_fonts/google_fonts.dart';
 // import '../widgets/chat_message_bubble.dart';
 // import '../widgets/chat_status_bar.dart';

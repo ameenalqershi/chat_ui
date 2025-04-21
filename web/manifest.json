@@ -1,6 +1,6 @@
 {
-    "name": "english_mentor_ai2",
-    "short_name": "english_mentor_ai2",
+    "name": "chat_ui",
+    "short_name": "chat_ui",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

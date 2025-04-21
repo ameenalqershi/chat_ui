@@ -1,12 +1,13 @@
+import 'package:chat_ui/models/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../../data/models/chat_model.dart';
-import 'chat_detail_screen.dart';
+import 'models/chat_message.dart';
+import 'chat_screen.dart';
 
 class ChatListScreen extends StatelessWidget {
-  final List<ChatModel> chats = [
-    ChatModel(
+  final List<Chat> chats = [
+    Chat(
       name: 'محمد علي',
       lastMessage: 'مرحبا! كيف الحال؟',
       imageUrl: 'https://placehold.co/150',
@@ -44,7 +45,7 @@ class ChatListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChatItem(BuildContext context, {required ChatModel chat}) {
+  Widget _buildChatItem(BuildContext context, {required Chat chat}) {
     return ListTile(
       leading: Stack(
         children: [

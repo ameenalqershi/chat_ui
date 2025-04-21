@@ -1,11 +1,12 @@
-import 'package:english_mentor_ai2/presentation/widgets/reaction_bar.dart';
-import 'package:english_mentor_ai2/providers/chat_provider.dart';
+import 'package:chat_ui/widgets/reaction_bar.dart';
+import 'package:chat_ui/providers/chat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/local_data_source.dart';
-import '../widgets/chat_message_bubble.dart';
-import '../widgets/chat_input_bar.dart';
-import '../widgets/telegram_album_bubble.dart';
+import 'package:chat_ui/models/chat_message.dart';
+import 'package:chat_ui/models/message_type.dart';
+import 'widgets/chat_message_bubble.dart';
+import 'widgets/chat_input_bar.dart';
+import 'widgets/telegram_album_bubble.dart';
 import 'package:swipe_to/swipe_to.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {

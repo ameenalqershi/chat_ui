@@ -1,4 +1,4 @@
-package com.example.english_mentor_ai2
+package com.example.chat_ui
 
 import io.flutter.embedding.android.FlutterActivity
 

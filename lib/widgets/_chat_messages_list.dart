@@ -1,9 +1,9 @@
-// import 'package:english_mentor_ai2/widgets/chat_grouped_images.dart';
+// import 'package:chat_ui/widgets/chat_grouped_images.dart';
 // import 'package:flutter/material.dart';
 // import 'chat_message_bubble.dart';
 // // import 'chat_grouped_images.dart'; // غير مستخدم حالياً
-// import 'package:english_mentor_ai2/models/chat_message.dart';
-// import 'package:english_mentor_ai2/models/message_type.dart';
+// import 'package:chat_ui/models/chat_message.dart';
+// import 'package:chat_ui/models/message_type.dart';
 
 // class ChatMessagesList extends StatelessWidget {
 //   final ChatDataSource dataSource;
