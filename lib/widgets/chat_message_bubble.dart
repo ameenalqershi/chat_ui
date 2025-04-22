@@ -1,6 +1,7 @@
 import 'package:chat_ui/models/chat_message.dart';
 import 'package:chat_ui/models/message_type.dart';
 import 'package:chat_ui/widgets/telegram_album_bubble.dart';
+import 'package:chat_ui/widgets/voice_message_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'telegram_image_viewer.dart';
@@ -191,7 +192,7 @@ class ChatMessageBubble extends StatelessWidget {
           ),
           if (msg.isMe)
             const Padding(
-              padding: EdgeInsets.only(right: 4),
+              padding: EdgeInsets.only(left: 4),
               child: Icon(Icons.done_all, size: 15, color: Colors.white70),
             ),
         ],
@@ -201,32 +202,96 @@ class ChatMessageBubble extends StatelessWidget {
 
   /// =========== VOICE BUBBLE ===========
   Widget _buildVoiceBubble(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: msg.isMe ? const Color(0xffe0f6fd) : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.07),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.play_arrow, color: Colors.blue[400]),
-          const SizedBox(width: 8),
-          const Text("Voice message", style: TextStyle(fontSize: 15)),
-          const SizedBox(width: 10),
-          Text(
-            _formatDuration(const Duration(seconds: 8)),
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          ),
-        ],
-      ),
+    return VoiceMessageBubble(
+      isMe: msg.isMe,
+      duration: msg.voiceDuration ?? Duration.zero,
+      isPlaying: msg.isPlaying ?? false,
+      onPlayPause: () {
+        // logic
+      },
+      waveform:
+          msg.waveform ??
+          [
+            0.1,
+            0.2,
+            0.4,
+            0.2,
+            0.1,
+            0.2,
+            0.4,
+            0.2,
+            0.1,
+            0.2,
+            0.4,
+            0.2,
+            0.1,
+            0.2,
+            0.4,
+            0.8,
+            0.3,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.2,
+            0.4,
+            0.2,
+            0.1,
+            0.2,
+            0.4,
+            0.2,
+            0.1,
+            0.2,
+            0.4,
+            0.2,
+            0.1,
+            0.2,
+            0.4,
+            0.8,
+            0.3,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.2,
+            0.4,
+            0.2,
+            0.1,
+            0.2,
+            0.4,
+            0.2,
+            0.1,
+            0.2,
+            0.4,
+            0.2,
+            0.1,
+            0.2,
+            0.4,
+            0.8,
+            0.3,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+          ],
+      timeString: _formatDuration(msg.voiceDuration ?? Duration.zero),
     );
   }
 
