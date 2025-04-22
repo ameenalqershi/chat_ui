@@ -1,5 +1,6 @@
 import 'package:chat_ui/models/chat_message.dart';
 import 'package:chat_ui/models/message_type.dart';
+import 'package:chat_ui/widgets/telegram_album_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'telegram_image_viewer.dart';
@@ -175,60 +176,26 @@ class ChatMessageBubble extends StatelessWidget {
 
   /// =========== SINGLE IMAGE BUBBLE (TELEGRAM STYLE) ===========
   Widget _buildTelegramImageBubble(BuildContext context) {
-    return Column(
-      crossAxisAlignment:
-          msg.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder:
-                    (_) => TelegramImageViewer(
-                      imageUrl: msg.mediaUrl!,
-                      senderName: msg.isMe ? "You" : msg.sender ?? "",
-                      sentAt: _formatSentAt(msg.createdAt),
-                    ),
-              ),
-            );
-          },
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 270,
-                maxHeight: 340,
-                minWidth: 120,
-                minHeight: 120,
-              ),
-              child: CachedNetworkImage(
-                imageUrl: msg.mediaUrl!,
-                fit: BoxFit.cover,
-                placeholder:
-                    (context, url) => Container(
-                      color: Colors.grey[200],
-                      height: 180,
-                      width: 240,
-                      child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 1),
-                      ),
-                    ),
-                errorWidget:
-                    (context, url, error) => Container(
-                      color: Colors.grey,
-                      height: 180,
-                      width: 240,
-                      child: const Icon(Icons.broken_image, size: 48),
-                    ),
-                // دعم precacheImage عبر CachedNetworkImage متوافر تلقائياً
-              ),
+    return TelegramAlbumBubble(
+      imageUrls: [msg.mediaUrl ?? ''],
+      isMe: msg.isMe,
+      bottomWidget: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "${msg.createdAt.hour.toString().padLeft(2, '0')}:${msg.createdAt.minute.toString().padLeft(2, '0')}",
+            style: TextStyle(
+              color: msg.isMe ? Colors.white : Colors.black54,
+              fontSize: 12,
             ),
           ),
-        ),
-        const SizedBox(height: 6),
-        _buildBubbleMeta(isImage: true),
-      ],
+          if (msg.isMe)
+            const Padding(
+              padding: EdgeInsets.only(right: 4),
+              child: Icon(Icons.done_all, size: 15, color: Colors.white70),
+            ),
+        ],
+      ),
     );
   }
 

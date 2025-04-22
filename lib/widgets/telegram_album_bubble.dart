@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-// استورد العارض الخاص بك
-import 'telegram_image_viewer.dart';
 
 class TelegramAlbumBubble extends StatelessWidget {
   final List<String> imageUrls;
@@ -17,176 +15,179 @@ class TelegramAlbumBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final urls = imageUrls.take(4).toList();
-    const double albumSize = 206;
-    const double gap = 1.5;
+    final int totalImages = imageUrls.length;
+    final albumSize = 206.0;
+    final gap = 2.0;
+    final borderRadius = BorderRadius.only(
+      topLeft: isMe ? const Radius.circular(19) : const Radius.circular(5),
+      topRight: isMe ? const Radius.circular(5) : const Radius.circular(19),
+      bottomLeft: const Radius.circular(19),
+      bottomRight: const Radius.circular(19),
+    );
+    final gradient =
+        isMe
+            ? const LinearGradient(
+              colors: [Color(0xff63aee1), Color(0xff3b8ed6)],
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+            )
+            : const LinearGradient(
+              colors: [Colors.white, Color(0xfff1f1f1)],
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+            );
 
-    // تعزيز الأداء عبر RepaintBoundary ومفتاح فريد للألبوم
-    return RepaintBoundary(
-      key: ValueKey('album_${urls.join("_")}'),
-      child: Align(
-        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient:
-                isMe
-                    ? const LinearGradient(
-                      colors: [Color(0xff6ec6ff), Color(0xff2196f3)],
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                    )
-                    : const LinearGradient(
-                      colors: [Colors.white, Color(0xfff1f1f1)],
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                    ),
-            borderRadius: BorderRadius.only(
-              topLeft:
-                  isMe ? const Radius.circular(18) : const Radius.circular(4),
-              topRight:
-                  isMe ? const Radius.circular(4) : const Radius.circular(18),
-              bottomLeft: const Radius.circular(18),
-              bottomRight: const Radius.circular(18),
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: borderRadius,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.07),
-                blurRadius: 13,
-                offset: const Offset(1, 5),
+          ],
+        ),
+        margin: EdgeInsets.only(
+          top: 6,
+          bottom: 6,
+          right: isMe ? 8 : 48,
+          left: isMe ? 48 : 8,
+        ),
+        padding: const EdgeInsets.all(3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _buildAlbumGrid(context, albumSize, gap),
+            if (bottomWidget != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4, right: 9, left: 9),
+                child: bottomWidget!,
               ),
-            ],
-          ),
-          margin: EdgeInsets.only(
-            top: 6,
-            bottom: 6,
-            right: isMe ? 8 : 48,
-            left: isMe ? 48 : 8,
-          ),
-          padding: const EdgeInsets.all(2),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              SizedBox(
-                height: albumSize,
-                width: albumSize,
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: _buildImage(
-                        context,
-                        urls[0],
-                        radius: BorderRadius.only(
-                          topLeft:
-                              isMe
-                                  ? const Radius.circular(13)
-                                  : const Radius.circular(18),
-                          bottomLeft: const Radius.circular(18),
-                          topRight: Radius.zero,
-                          bottomRight: Radius.zero,
-                        ),
-                        imageIndex: 0,
-                        allUrls: urls,
-                      ),
-                    ),
-                    const SizedBox(width: gap),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: List.generate(3, (i) {
-                          if (urls.length <= i + 1) return const SizedBox();
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                bottom: i != 2 ? gap : 0,
-                              ),
-                              child: _buildImage(
-                                context,
-                                urls[i + 1],
-                                radius: BorderRadius.only(
-                                  topRight:
-                                      isMe
-                                          ? const Radius.circular(4)
-                                          : const Radius.circular(18),
-                                  topLeft: Radius.zero,
-                                  bottomLeft: Radius.zero,
-                                  bottomRight:
-                                      i == 2
-                                          ? (isMe
-                                              ? const Radius.circular(7)
-                                              : const Radius.circular(18))
-                                          : Radius.zero,
-                                ),
-                                imageIndex: i + 1,
-                                allUrls: urls,
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (bottomWidget != null) ...[
-                const SizedBox(height: 5),
-                bottomWidget!,
-              ],
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildImage(
-    BuildContext context,
-    String url, {
-    BorderRadius? radius,
-    required int imageIndex,
-    required List<String> allUrls,
-  }) {
-    // مفتاح فريد لكل صورة داخل الألبوم
-    return RepaintBoundary(
-      key: ValueKey('img_${url}_$imageIndex'),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder:
-                  (_) => TelegramImageViewer(
-                    imageUrl: url,
-                    senderName: '', // يمكنك تمرير اسم المرسل هنا إذا توفّر
-                    sentAt: '', // ويمكنك تمرير الوقت إذا توفّر
-                    // لمزيد من التطوير: يمكنك تمرير قائمة الصور وأندكس الحالي لدعم ألبوم الصور
-                  ),
-            ),
-          );
-        },
-        child: ClipRRect(
-          borderRadius: radius ?? BorderRadius.zero,
+  Widget _buildAlbumGrid(BuildContext context, double size, double gap) {
+    final int total = imageUrls.length;
+    if (total == 1) {
+      // صورة واحدة
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: GestureDetector(
+          onTap: () => _openImageViewer(context, 0, imageUrls),
           child: CachedNetworkImage(
-            imageUrl: url,
+            imageUrl: imageUrls[0],
+            width: size,
+            height: size,
             fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            alignment: Alignment.center,
             placeholder:
-                (context, url) => Container(
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 1),
-                  ),
-                ),
-            errorWidget:
-                (context, url, error) => Container(
-                  color: Colors.grey,
-                  child: const Icon(Icons.broken_image),
+                (ctx, _) => Container(
+                  color: Colors.grey.shade200,
+                  width: size,
+                  height: size,
                 ),
           ),
         ),
+      );
+    } else if (total <= 4) {
+      // حتى 4 صور: شبكة 2x2
+      return SizedBox(
+        width: size,
+        height: size,
+        child: GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: total,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: gap,
+            crossAxisSpacing: gap,
+          ),
+          itemBuilder:
+              (context, i) => _albumImageTile(context, i, imageUrls[i]),
+        ),
+      );
+    } else {
+      // 5 صور فأكثر: أول 3 صور عادية + رابع صورة عليها طبقة +N
+      // الصور: [0,1,2,3] (الرابعة عليها overlay)
+      final extraCount = total - 4;
+      return SizedBox(
+        width: size,
+        height: size,
+        child: GridView(
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: gap,
+            crossAxisSpacing: gap,
+          ),
+          children: [
+            _albumImageTile(context, 0, imageUrls[0]),
+            _albumImageTile(context, 1, imageUrls[1]),
+            _albumImageTile(context, 2, imageUrls[2]),
+            Stack(
+              fit: StackFit.expand,
+              children: [
+                _albumImageTile(context, 3, imageUrls[3]),
+                Container(
+                  color: Colors.black.withOpacity(0.44),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '+$extraCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      shadows: [Shadow(color: Colors.black38, blurRadius: 2)],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget _albumImageTile(BuildContext context, int index, String url) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: GestureDetector(
+        onTap: () => _openImageViewer(context, index, imageUrls),
+        child: CachedNetworkImage(
+          imageUrl: url,
+          fit: BoxFit.cover,
+          placeholder: (ctx, _) => Container(color: Colors.grey.shade200),
+        ),
       ),
     );
+  }
+
+  void _openImageViewer(
+    BuildContext context,
+    int initialIndex,
+    List<String> urls,
+  ) {
+    //     Navigator.of(context).push(
+    //   MaterialPageRoute(
+    //     builder:
+    //         (_) => TelegramImageViewer(
+    //           imageUrl: url,
+    //           senderName: '', // يمكنك تمرير اسم المرسل هنا إذا توفّر
+    //           sentAt: '', // ويمكنك تمرير الوقت إذا توفّر
+    //           // لمزيد من التطوير: يمكنك تمرير قائمة الصور وأندكس الحالي لدعم ألبوم الصور
+    //         ),
+    //   ),
+    // );
+    // هنا يمكنك فتح عارض صور مخصص عند الضغط (مثل تليجرام)
+    // يمكنك استكمال ذلك بمنطقك الحالي أو إضافة حوار تكبير الصورة
+    // showDialog(...);
   }
 }
